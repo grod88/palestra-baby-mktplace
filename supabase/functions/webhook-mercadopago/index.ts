@@ -207,17 +207,7 @@ serve(async (req: Request) => {
 
       if (orderItems) {
         for (const item of orderItems) {
-          await supabase
-            .from("product_sizes")
-            .update({
-              stock: supabase.rpc
-                ? undefined // handled below
-                : undefined,
-            })
-            .eq("product_id", item.product_id)
-            .eq("size_label", item.size);
-
-          // Increment stock back
+          // Increment stock back using RPC
           await supabase.rpc("increment_stock", {
             p_product_id: item.product_id,
             p_size_label: item.size,

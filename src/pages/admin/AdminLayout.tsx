@@ -78,9 +78,11 @@ export default function AdminLayout() {
     <div className="min-h-screen bg-muted/30">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden cursor-default"
           onClick={() => setSidebarOpen(false)}
+          aria-label="Fechar menu"
         />
       )}
 

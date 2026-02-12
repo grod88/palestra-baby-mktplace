@@ -43,9 +43,9 @@ function slugify(text: string): string {
   return text
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+    .replaceAll(/[\u0300-\u036f]/g, "")
+    .replaceAll(/[^a-z0-9]+/g, "-")
+    .replaceAll(/(^-|-$)/g, "");
 }
 
 export default function AdminProductForm() {
@@ -380,7 +380,7 @@ export default function AdminProductForm() {
                   value={newCareInstruction}
                   onChange={(e) => setNewCareInstruction(e.target.value)}
                   placeholder="Ex: Lavar à máquina em água fria"
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddCareInstruction())}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCareInstruction(); } }}
                 />
                 <Button variant="outline" size="icon" onClick={handleAddCareInstruction}>
                   <Plus className="w-4 h-4" />
@@ -449,8 +449,8 @@ export default function AdminProductForm() {
                       className="w-24"
                       defaultValue={size.stock}
                       onBlur={(e) => {
-                        const val = parseInt(e.target.value);
-                        if (!isNaN(val) && val !== size.stock) {
+                        const val = Number.parseInt(e.target.value);
+                        if (!Number.isNaN(val) && val !== size.stock) {
                           handleUpdateStock(size.id, val);
                         }
                       }}
@@ -478,7 +478,7 @@ export default function AdminProductForm() {
                     min={0}
                     className="w-24"
                     value={newSizeStock}
-                    onChange={(e) => setNewSizeStock(parseInt(e.target.value) || 0)}
+                    onChange={(e) => setNewSizeStock(Number.parseInt(e.target.value) || 0)}
                     placeholder="10"
                   />
                   <Button variant="outline" onClick={handleAddSize}>
@@ -564,7 +564,7 @@ export default function AdminProductForm() {
                   step="0.01"
                   min={0}
                   value={form.price}
-                  onChange={(e) => updateField("price", parseFloat(e.target.value) || 0)}
+                  onChange={(e) => updateField("price", Number.parseFloat(e.target.value) || 0)}
                 />
               </div>
               <div className="space-y-2">
@@ -577,7 +577,7 @@ export default function AdminProductForm() {
                   value={form.originalPrice ?? ""}
                   onChange={(e) => {
                     const v = e.target.value;
-                    updateField("originalPrice", v ? parseFloat(v) : null);
+                    updateField("originalPrice", v ? Number.parseFloat(v) : null);
                   }}
                   placeholder="Deixe vazio se sem desconto"
                 />

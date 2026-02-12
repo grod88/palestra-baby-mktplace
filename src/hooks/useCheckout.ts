@@ -128,7 +128,7 @@ export function useCheckout() {
 
   const lookupCep = useCallback(async () => {
     const cep = state.address.cep;
-    if (!cep || cep.replace(/\D/g, "").length !== 8) return;
+    if (!cep || cep.replaceAll(/\D/g, "").length !== 8) return;
 
     setIsLoadingCep(true);
     try {

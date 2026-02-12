@@ -17,18 +17,18 @@ export const customerSchema = z.object({
   phone: z
     .string()
     .regex(/^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/, "Telefone inválido")
-    .transform((v) => v.replace(/\D/g, "")),
+    .transform((v) => v.replaceAll(/\D/g, "")),
   cpf: z
     .string()
     .regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, "CPF inválido")
-    .transform((v) => v.replace(/\D/g, "")),
+    .transform((v) => v.replaceAll(/\D/g, "")),
 });
 
 export const addressSchema = z.object({
   cep: z
     .string()
     .regex(/^\d{5}-?\d{3}$/, "CEP inválido")
-    .transform((v) => v.replace(/\D/g, "")),
+    .transform((v) => v.replaceAll(/\D/g, "")),
   street: z.string().min(3, "Rua obrigatória"),
   number: z.string().min(1, "Número obrigatório"),
   complement: z.string().optional().default(""),
@@ -177,7 +177,7 @@ export interface ViaCepResult {
 export async function fetchAddressByCep(
   cep: string
 ): Promise<ViaCepResult | null> {
-  const cleanCep = cep.replace(/\D/g, "");
+  const cleanCep = cep.replaceAll(/\D/g, "");
   if (cleanCep.length !== 8) return null;
 
   try {

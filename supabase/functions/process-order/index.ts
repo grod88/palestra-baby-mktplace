@@ -170,8 +170,8 @@ serve(async (req: Request) => {
 
     // ── Create/find customer ───────────────────────────────────────────────
 
-    const cleanCpf = customer.cpf?.replace(/\D/g, "") || null;
-    const cleanPhone = customer.phone?.replace(/\D/g, "") || null;
+    const cleanCpf = customer.cpf?.replaceAll(/\D/g, "") || null;
+    const cleanPhone = customer.phone?.replaceAll(/\D/g, "") || null;
 
     // Try to find existing customer by email
     const { data: existingCustomer } = await supabase
@@ -221,7 +221,7 @@ serve(async (req: Request) => {
         shipping_method: shippingMethod,
         shipping_price: shippingPrice,
         shipping_name: customer.name,
-        shipping_cep: address.cep.replace(/\D/g, ""),
+        shipping_cep: address.cep.replaceAll(/\D/g, ""),
         shipping_street: address.street,
         shipping_number: address.number,
         shipping_complement: address.complement || null,

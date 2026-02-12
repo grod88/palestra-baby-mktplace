@@ -386,20 +386,22 @@ export default function Checkout() {
                         const isDisabled = !!option.minValue && !isFreeAvailable;
 
                         return (
-                          <label
+                          <div
                             key={option.id}
                             className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
                               state.shippingMethod === option.id
                                 ? "border-primary bg-primary/5"
                                 : "border-border hover:border-primary/50"
                             } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                            onClick={() => !isDisabled && setShippingMethod(option.id as "pac" | "sedex" | "free")}
                           >
                             <div className="flex items-center gap-3">
                               <RadioGroupItem
                                 value={option.id}
+                                id={`shipping-${option.id}`}
                                 disabled={isDisabled}
                               />
-                              <div>
+                              <label htmlFor={`shipping-${option.id}`} className="cursor-pointer">
                                 <p className="font-medium text-foreground">
                                   {option.name}
                                 </p>
@@ -411,14 +413,14 @@ export default function Checkout() {
                                     Pedido mínimo: {formatPrice(option.minValue!)}
                                   </p>
                                 )}
-                              </div>
+                              </label>
                             </div>
                             <span className="font-medium text-foreground">
                               {option.price === 0
                                 ? "Grátis"
                                 : formatPrice(option.price)}
                             </span>
-                          </label>
+                          </div>
                         );
                       })}
                     </RadioGroup>
@@ -462,16 +464,17 @@ export default function Checkout() {
                       }
                       className="space-y-3"
                     >
-                      <label
+                      <div
                         className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
                           state.paymentMethod === "pix"
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/50"
                         }`}
+                        onClick={() => setPaymentMethod("pix")}
                       >
                         <div className="flex items-center gap-3">
-                          <RadioGroupItem value="pix" />
-                          <div>
+                          <RadioGroupItem value="pix" id="payment-pix" />
+                          <label htmlFor="payment-pix" className="cursor-pointer">
                             <div className="flex items-center gap-2">
                               <QrCode className="w-5 h-5 text-primary" />
                               <p className="font-medium text-foreground">PIX</p>
@@ -482,20 +485,21 @@ export default function Checkout() {
                             <p className="text-sm text-muted-foreground">
                               Pagamento instantâneo
                             </p>
-                          </div>
+                          </label>
                         </div>
-                      </label>
+                      </div>
 
-                      <label
+                      <div
                         className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
                           state.paymentMethod === "credit_card"
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/50"
                         }`}
+                        onClick={() => setPaymentMethod("credit_card")}
                       >
                         <div className="flex items-center gap-3">
-                          <RadioGroupItem value="credit_card" />
-                          <div>
+                          <RadioGroupItem value="credit_card" id="payment-credit-card" />
+                          <label htmlFor="payment-credit-card" className="cursor-pointer">
                             <div className="flex items-center gap-2">
                               <CreditCard className="w-5 h-5 text-primary" />
                               <p className="font-medium text-foreground">
@@ -505,9 +509,9 @@ export default function Checkout() {
                             <p className="text-sm text-muted-foreground">
                               Em até 3x sem juros
                             </p>
-                          </div>
+                          </label>
                         </div>
-                      </label>
+                      </div>
                     </RadioGroup>
                   </div>
 
