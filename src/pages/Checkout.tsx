@@ -388,12 +388,20 @@ export default function Checkout() {
                         return (
                           <div
                             key={option.id}
+                            role="button"
+                            tabIndex={isDisabled ? -1 : 0}
                             className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
                               state.shippingMethod === option.id
                                 ? "border-primary bg-primary/5"
                                 : "border-border hover:border-primary/50"
                             } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
                             onClick={() => !isDisabled && setShippingMethod(option.id as "pac" | "sedex" | "free")}
+                            onKeyDown={(e) => {
+                              if ((e.key === "Enter" || e.key === " ") && !isDisabled) {
+                                e.preventDefault();
+                                setShippingMethod(option.id as "pac" | "sedex" | "free");
+                              }
+                            }}
                           >
                             <div className="flex items-center gap-3">
                               <RadioGroupItem
@@ -465,12 +473,20 @@ export default function Checkout() {
                       className="space-y-3"
                     >
                       <div
+                        role="button"
+                        tabIndex={0}
                         className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
                           state.paymentMethod === "pix"
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/50"
                         }`}
                         onClick={() => setPaymentMethod("pix")}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setPaymentMethod("pix");
+                          }
+                        }}
                       >
                         <div className="flex items-center gap-3">
                           <RadioGroupItem value="pix" id="payment-pix" />
@@ -490,12 +506,20 @@ export default function Checkout() {
                       </div>
 
                       <div
+                        role="button"
+                        tabIndex={0}
                         className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
                           state.paymentMethod === "credit_card"
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/50"
                         }`}
                         onClick={() => setPaymentMethod("credit_card")}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setPaymentMethod("credit_card");
+                          }
+                        }}
                       >
                         <div className="flex items-center gap-3">
                           <RadioGroupItem value="credit_card" id="payment-credit-card" />
