@@ -1,6 +1,6 @@
 # CLAUDE.md — Palestra Baby Marketplace
 
-> Documento de referência para Claude Code. Leia INTEGRALMENTE antes de qualquer tarefa.
+> Documento de referência para Claude Code. Leia INTEGRALMENTE antes de qualquer tarefa....
 
 ## 🎯 Sobre o Projeto
 
