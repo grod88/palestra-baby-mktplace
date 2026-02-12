@@ -53,3 +53,15 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.organization=palestra-baby
+            -Dsonar.projectKey=palestra-baby-mktplace
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
