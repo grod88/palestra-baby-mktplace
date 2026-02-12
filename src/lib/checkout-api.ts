@@ -83,17 +83,25 @@ export interface CheckoutResult {
 
 // ─── Shipping ────────────────────────────────────────────────────────────────
 
-export const SHIPPING_OPTIONS = [
-  { id: "pac" as const, name: "PAC", price: 15.9, days: "8-12 dias úteis" },
-  { id: "sedex" as const, name: "SEDEX", price: 29.9, days: "3-5 dias úteis" },
+interface ShippingOption {
+  id: "pac" | "sedex" | "free";
+  name: string;
+  price: number;
+  days: string;
+  minValue?: number;
+}
+
+export const SHIPPING_OPTIONS: ShippingOption[] = [
+  { id: "pac", name: "PAC", price: 15.9, days: "8-12 dias úteis" },
+  { id: "sedex", name: "SEDEX", price: 29.9, days: "3-5 dias úteis" },
   {
-    id: "free" as const,
+    id: "free",
     name: "Frete Grátis",
     price: 0,
     days: "10-15 dias úteis",
     minValue: 150,
   },
-] as const;
+];
 
 export function getShippingPrice(
   method: string,
