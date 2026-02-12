@@ -162,25 +162,28 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: 🔗 Pull Vercel Environment
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: 🏗️ Build with Vercel
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token="$VERCEL_TOKEN"
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: 🚀 Deploy to Production
         id: deploy
         run: |
-          URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          URL=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
           echo "url=$URL" >> $GITHUB_OUTPUT
           echo "### 🚀 Deployed to Production" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** $URL" >> $GITHUB_STEP_SUMMARY
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
@@ -210,25 +213,28 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: 🔗 Pull Vercel Environment
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: 🏗️ Build with Vercel
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token="$VERCEL_TOKEN"
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: 🚀 Deploy Preview
         id: deploy
         run: |
-          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          URL=$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")
           echo "url=$URL" >> $GITHUB_OUTPUT
           echo "### 🔍 Preview Deployed" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** $URL" >> $GITHUB_STEP_SUMMARY
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
