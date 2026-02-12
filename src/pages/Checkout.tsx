@@ -381,9 +381,10 @@ export default function Checkout() {
                       className="space-y-3"
                     >
                       {SHIPPING_OPTIONS.map((option) => {
+                        const minValue = 'minValue' in option ? option.minValue : undefined;
                         const isFreeAvailable =
-                          !option.minValue || totals.subtotal >= option.minValue;
-                        const isDisabled = !!option.minValue && !isFreeAvailable;
+                          !minValue || totals.subtotal >= minValue;
+                        const isDisabled = !!minValue && !isFreeAvailable;
 
                         return (
                           <div
@@ -416,9 +417,9 @@ export default function Checkout() {
                                 <p className="text-sm text-muted-foreground">
                                   {option.days}
                                 </p>
-                                {isDisabled && (
+                                {isDisabled && minValue && (
                                   <p className="text-xs text-muted-foreground">
-                                    Pedido mínimo: {formatPrice(option.minValue!)}
+                                    Pedido mínimo: {formatPrice(minValue)}
                                   </p>
                                 )}
                               </label>

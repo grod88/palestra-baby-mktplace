@@ -19,6 +19,8 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+.env.production
+.vercel
 
 # Editor
 .vscode/*
