@@ -1,0 +1,70 @@
+{
+  "$schema": "https://claude.ai/schema/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npx *)",
+      "Bash(git *)",
+      "Bash(supabase *)",
+      "Bash(cat *)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(rm *)",
+      "Bash(touch *)",
+      "Bash(echo *)",
+      "Bash(curl *)",
+      "Read(*)",
+      "Write(src/**)",
+      "Write(supabase/**)",
+      "Write(docs/**)",
+      "Write(tests/**)",
+      "Write(.github/**)",
+      "Write(package.json)",
+      "Write(tsconfig.json)",
+      "Write(vite.config.ts)",
+      "Write(tailwind.config.ts)",
+      "Write(vitest.config.ts)",
+      "Write(.env*)"
+    ],
+    "deny": [
+      "Write(src/components/ui/**)",
+      "Bash(rm -rf /)",
+      "Bash(sudo *)"
+    ]
+  },
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub: criar PRs, issues, code review, gerenciar repositório"
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "supabase-mcp-server@latest"],
+      "env": {
+        "SUPABASE_URL": "${VITE_SUPABASE_URL}",
+        "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}"
+      },
+      "description": "Supabase: queries SQL, gerenciar schema, RLS, storage, edge functions"
+    },
+    "gcloud": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-gcp"],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "${GOOGLE_APPLICATION_CREDENTIALS}",
+        "GCP_PROJECT_ID": "${GCP_PROJECT_ID}"
+      },
+      "description": "Google Cloud: Cloud Run, Cloud Build, BigQuery (uso futuro)"
+    }
+  }
+}

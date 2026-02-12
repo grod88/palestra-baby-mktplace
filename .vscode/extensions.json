@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "dsznajder.es7-react-js-snippets",
+    "yoavbls.pretty-ts-errors",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "naumovs.color-highlight",
+    "usernamehw.errorlens",
+    "eamodio.gitlens",
+    "github.copilot",
+    "github.copilot-chat",
+    "vitest.explorer",
+    "supabase.supabase-vscode"
+  ]
+}
