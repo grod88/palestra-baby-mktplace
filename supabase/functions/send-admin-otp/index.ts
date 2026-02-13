@@ -76,7 +76,10 @@ serve(async (req) => {
       .eq("used", false);
 
     // ── 4. Generate 6-digit OTP + bcrypt hash ─────────────────────────────
-    const plainCode = String(Math.floor(100000 + Math.random() * 900000));
+    // Use cryptographically secure random number generator
+    const randomBytes = new Uint32Array(1);
+    crypto.getRandomValues(randomBytes);
+    const plainCode = String(100000 + (randomBytes[0] % 900000));
     const hashedCode = await bcrypt.hash(plainCode);
 
     // ── 5. Save to admin_otp_codes (expires in 5 minutes) ─────────────────
