@@ -11,55 +11,27 @@
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-function jsonResponse(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
+import { jsonResponse, handleCorsPrelight } from "../_shared/cors.ts";
+import { getAuthenticatedAdmin, isAuthError } from "../_shared/auth.ts";
 
 serve(async (req) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return handleCorsPrelight();
   }
 
   try {
-    // ── 1. Extract user from JWT ──────────────────────────────────────────
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return jsonResponse({ error: "Token de autenticação não fornecido" }, 401);
+    // ── 1. Extract and validate admin user ─────────────────────────────────
+    const authResult = await getAuthenticatedAdmin(req.headers.get("Authorization"));
+
+    if (isAuthError(authResult)) {
+      return jsonResponse({ error: authResult.error }, authResult.status);
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const { user, supabaseService: supabase } = authResult;
 
-    // Create client with user's JWT
-    const supabaseUser = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
-
-    if (userError || !user) {
-      return jsonResponse({ error: "Sessão inválida" }, 401);
-    }
-
-    // Verify admin role
-    if (user.app_metadata?.role !== "admin") {
-      return jsonResponse({ error: "Acesso negado" }, 403);
-    }
-
-    // ── Parse body ────────────────────────────────────────────────────────
+    // ── 2. Parse body ──────────────────────────────────────────────────────
     const body = await req.json();
     const code = body?.code;
 
@@ -67,10 +39,7 @@ serve(async (req) => {
       return jsonResponse({ error: "Código inválido. Deve ter 6 dígitos." }, 400);
     }
 
-    // ── Service role client ───────────────────────────────────────────────
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // ── 2. Fetch latest unused, non-expired code ──────────────────────────
+    // ── 3. Fetch latest unused, non-expired code ───────────────────────────
     const { data: otpRecord, error: fetchError } = await supabase
       .from("admin_otp_codes")
       .select("*")
@@ -90,7 +59,7 @@ serve(async (req) => {
       return jsonResponse({ error: "Código expirado ou inexistente. Solicite um novo código." }, 401);
     }
 
-    // ── 3. Check attempts ─────────────────────────────────────────────────
+    // ── 4. Check attempts ──────────────────────────────────────────────────
     if (otpRecord.attempts >= 3) {
       // Mark as used (burned)
       await supabase
@@ -103,13 +72,13 @@ serve(async (req) => {
       }, 429);
     }
 
-    // ── 4. Increment attempts first ───────────────────────────────────────
+    // ── 5. Increment attempts first ────────────────────────────────────────
     await supabase
       .from("admin_otp_codes")
       .update({ attempts: otpRecord.attempts + 1 })
       .eq("id", otpRecord.id);
 
-    // ── 5. Compare bcrypt ─────────────────────────────────────────────────
+    // ── 6. Compare bcrypt ──────────────────────────────────────────────────
     const isValid = await bcrypt.compare(code, otpRecord.code);
 
     if (!isValid) {
@@ -120,13 +89,13 @@ serve(async (req) => {
       }, 401);
     }
 
-    // ── 6. Mark as used ───────────────────────────────────────────────────
+    // ── 7. Mark as used ────────────────────────────────────────────────────
     await supabase
       .from("admin_otp_codes")
       .update({ used: true })
       .eq("id", otpRecord.id);
 
-    // ── 7. Return success ─────────────────────────────────────────────────
+    // ── 8. Return success ──────────────────────────────────────────────────
     return jsonResponse({
       verified: true,
       message: "Código verificado com sucesso",

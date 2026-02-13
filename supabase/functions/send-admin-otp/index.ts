@@ -12,77 +12,47 @@
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-function jsonResponse(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
+import { jsonResponse, handleCorsPrelight } from "../_shared/cors.ts";
+import { getAuthenticatedAdmin, isAuthError } from "../_shared/auth.ts";
 
 serve(async (req) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return handleCorsPrelight();
   }
 
   try {
-    // ── 1. Extract user from JWT ──────────────────────────────────────────
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return jsonResponse({ error: "Token de autenticação não fornecido" }, 401);
+    // ── 1. Extract and validate admin user ─────────────────────────────────
+    const authResult = await getAuthenticatedAdmin(req.headers.get("Authorization"));
+
+    if (isAuthError(authResult)) {
+      return jsonResponse({ error: authResult.error }, authResult.status);
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    const { user, supabaseService: supabase } = authResult;
 
+    // ── 2. Check Resend API key ────────────────────────────────────────────
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (!resendApiKey) {
       return jsonResponse({ error: "RESEND_API_KEY não configurada" }, 500);
     }
 
-    // Create client with user's JWT to validate session
-    const supabaseUser = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
-
-    if (userError || !user) {
-      return jsonResponse({ error: "Sessão inválida" }, 401);
-    }
-
-    // ── 2. Verify admin role ──────────────────────────────────────────────
-    if (user.app_metadata?.role !== "admin") {
-      return jsonResponse({ error: "Acesso negado. Apenas administradores." }, 403);
-    }
-
-    // ── Service role client for DB operations ─────────────────────────────
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // ── 3. Invalidate previous unused codes ───────────────────────────────
+    // ── 3. Invalidate previous unused codes ────────────────────────────────
     await supabase
       .from("admin_otp_codes")
       .update({ used: true })
       .eq("user_id", user.id)
       .eq("used", false);
 
-    // ── 4. Generate 6-digit OTP + bcrypt hash ─────────────────────────────
+    // ── 4. Generate 6-digit OTP + bcrypt hash ──────────────────────────────
     // Use cryptographically secure random number generator
     const randomBytes = new Uint32Array(1);
     crypto.getRandomValues(randomBytes);
     const plainCode = String(100000 + (randomBytes[0] % 900000));
     const hashedCode = await bcrypt.hash(plainCode);
 
-    // ── 5. Save to admin_otp_codes (expires in 5 minutes) ─────────────────
+    // ── 5. Save to admin_otp_codes (expires in 5 minutes) ──────────────────
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
     const { error: insertError } = await supabase
@@ -98,7 +68,7 @@ serve(async (req) => {
       return jsonResponse({ error: "Erro ao gerar código de verificação" }, 500);
     }
 
-    // ── 6. Send email via Resend ──────────────────────────────────────────
+    // ── 6. Send email via Resend ───────────────────────────────────────────
     const emailHtml = `
       <!DOCTYPE html>
       <html>
@@ -157,7 +127,7 @@ serve(async (req) => {
       return jsonResponse({ error: "Erro ao enviar email de verificação" }, 500);
     }
 
-    // ── 7. Return success ─────────────────────────────────────────────────
+    // ── 7. Return success ──────────────────────────────────────────────────
     return jsonResponse({
       success: true,
       expires_in: 300,
