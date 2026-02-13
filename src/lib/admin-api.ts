@@ -366,25 +366,35 @@ export async function createProduct(form: ProductFormData): Promise<AdminProduct
   return mapAdminProduct(data as DbProductWithRelations);
 }
 
+/** Mapeamento de campos do form para colunas do banco */
+const FORM_TO_DB_FIELD_MAP: Record<string, string> = {
+  name: "name",
+  slug: "slug",
+  description: "description",
+  shortDescription: "short_description",
+  category: "category",
+  price: "price",
+  originalPrice: "original_price",
+  featured: "featured",
+  active: "active",
+  careInstructions: "care_instructions",
+  measurements: "measurements",
+  weightKg: "weight_kg",
+  heightCm: "height_cm",
+  widthCm: "width_cm",
+  lengthCm: "length_cm",
+};
+
 /** Atualizar produto */
 export async function updateProduct(id: string, form: Partial<ProductFormData>): Promise<AdminProduct> {
-   
-  const updateData: Record<string, any> = {};
-  if (form.name !== undefined) updateData.name = form.name;
-  if (form.slug !== undefined) updateData.slug = form.slug;
-  if (form.description !== undefined) updateData.description = form.description;
-  if (form.shortDescription !== undefined) updateData.short_description = form.shortDescription;
-  if (form.category !== undefined) updateData.category = form.category;
-  if (form.price !== undefined) updateData.price = form.price;
-  if (form.originalPrice !== undefined) updateData.original_price = form.originalPrice;
-  if (form.featured !== undefined) updateData.featured = form.featured;
-  if (form.active !== undefined) updateData.active = form.active;
-  if (form.careInstructions !== undefined) updateData.care_instructions = form.careInstructions;
-  if (form.measurements !== undefined) updateData.measurements = form.measurements;
-  if (form.weightKg !== undefined) updateData.weight_kg = form.weightKg;
-  if (form.heightCm !== undefined) updateData.height_cm = form.heightCm;
-  if (form.widthCm !== undefined) updateData.width_cm = form.widthCm;
-  if (form.lengthCm !== undefined) updateData.length_cm = form.lengthCm;
+  const updateData: Record<string, unknown> = {};
+
+  for (const [formKey, dbKey] of Object.entries(FORM_TO_DB_FIELD_MAP)) {
+    const value = form[formKey as keyof ProductFormData];
+    if (value !== undefined) {
+      updateData[dbKey] = value;
+    }
+  }
 
   const { data, error } = await supabase
     .from("products")
