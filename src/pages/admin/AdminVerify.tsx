@@ -30,17 +30,7 @@ export default function AdminVerify() {
   const [otpSent, setOtpSent] = useState(false);
   const [timer, setTimer] = useState(0);
 
-  // Redirect if already fully authenticated
-  if (!isLoading && isMfaVerified) {
-    return <Navigate to="/admin" replace />;
-  }
-
-  // Redirect if not authenticated at all
-  if (!isLoading && !isAuthenticated) {
-    return <Navigate to="/admin/login" replace />;
-  }
-
-  // Send OTP on mount
+  // Send OTP handler
   const handleSendOtp = useCallback(async () => {
     setIsSending(true);
     try {
@@ -113,6 +103,16 @@ export default function AdminVerify() {
     const s = seconds % 60;
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
+
+  // Redirect if already fully authenticated
+  if (!isLoading && isMfaVerified) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  // Redirect if not authenticated at all
+  if (!isLoading && !isAuthenticated) {
+    return <Navigate to="/admin/login" replace />;
+  }
 
   if (isLoading) {
     return (
