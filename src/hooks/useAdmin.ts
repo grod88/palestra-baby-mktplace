@@ -22,8 +22,14 @@ import {
   updateOrderStatus,
   updateOrderNotes,
   updateTrackingCode,
+  fetchCoupons,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
+  toggleCouponActive,
   type ProductFormData,
   type StockUpdate,
+  type CouponFormData,
 } from "@/lib/admin-api";
 import type { OrderStatus } from "@/types/database";
 
@@ -240,6 +246,57 @@ export function useUpdateTrackingCode() {
       updateTrackingCode(orderId, trackingCode),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+    },
+  });
+}
+
+// ─── Coupons ─────────────────────────────────────────────────────────────────
+
+export function useAdminCoupons() {
+  return useQuery({
+    queryKey: ["admin", "coupons"],
+    queryFn: fetchCoupons,
+  });
+}
+
+export function useCreateCoupon() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (form: CouponFormData) => createCoupon(form),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "coupons"] });
+    },
+  });
+}
+
+export function useUpdateCoupon() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, form }: { id: string; form: Partial<CouponFormData> }) =>
+      updateCoupon(id, form),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "coupons"] });
+    },
+  });
+}
+
+export function useDeleteCoupon() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteCoupon(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "coupons"] });
+    },
+  });
+}
+
+export function useToggleCouponActive() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, active }: { id: string; active: boolean }) =>
+      toggleCouponActive(id, active),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "coupons"] });
     },
   });
 }

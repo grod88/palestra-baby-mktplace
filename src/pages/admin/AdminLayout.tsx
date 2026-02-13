@@ -1,5 +1,5 @@
 import { Navigate, Outlet, Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
   LayoutDashboard,
   Package,
@@ -10,17 +10,18 @@ import {
   X,
   ChevronRight,
   Loader2,
+  Ticket,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin" },
   { label: "Produtos", icon: Package, href: "/admin/produtos" },
   { label: "Estoque", icon: BarChart3, href: "/admin/estoque" },
   { label: "Pedidos", icon: ShoppingCart, href: "/admin/pedidos" },
+  { label: "Cupons", icon: Ticket, href: "/admin/cupons" },
 ];
 
 function getBreadcrumbs(pathname: string) {
@@ -32,6 +33,7 @@ function getBreadcrumbs(pathname: string) {
     produtos: "Produtos",
     estoque: "Estoque",
     pedidos: "Pedidos",
+    cupons: "Cupons",
     novo: "Novo",
     editar: "Editar",
   };
@@ -49,7 +51,7 @@ function getBreadcrumbs(pathname: string) {
 }
 
 export default function AdminLayout() {
-  const { user, isAdmin, isLoading, mfaVerified, signOut } = useAuth();
+  const { user, isAuthenticated, isMfaVerified, isLoading, signOut } = useAdminAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -62,14 +64,14 @@ export default function AdminLayout() {
     );
   }
 
-  // Not authenticated or not admin
-  if (!user || !isAdmin) {
+  // Not authenticated
+  if (!isAuthenticated) {
     return <Navigate to="/admin/login" replace />;
   }
 
   // MFA not verified
-  if (!mfaVerified) {
-    return <Navigate to="/admin/login" replace />;
+  if (!isMfaVerified) {
+    return <Navigate to="/admin/verify" replace />;
   }
 
   const breadcrumbs = getBreadcrumbs(location.pathname);

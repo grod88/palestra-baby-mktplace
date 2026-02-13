@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 
 // Admin — lazy loaded (code-split)
 const AdminLogin = lazy(() => import("./pages/admin/Login"));
+const AdminVerify = lazy(() => import("./pages/admin/AdminVerify"));
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
@@ -19,6 +20,7 @@ const AdminProductForm = lazy(() => import("./pages/admin/AdminProductForm"));
 const AdminStock = lazy(() => import("./pages/admin/AdminStock"));
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const AdminOrderDetail = lazy(() => import("./pages/admin/AdminOrderDetail"));
+const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 
 // Checkout confirmation — lazy loaded
 const OrderConfirmation = lazy(() => import("./pages/OrderConfirmation"));
@@ -71,6 +73,14 @@ const App = () => (
             }
           />
           <Route
+            path="/admin/verify"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminVerify />
+              </Suspense>
+            }
+          />
+          <Route
             path="/admin"
             element={
               <Suspense fallback={<AdminFallback />}>
@@ -85,6 +95,7 @@ const App = () => (
             <Route path="estoque" element={<AdminStock />} />
             <Route path="pedidos" element={<AdminOrders />} />
             <Route path="pedidos/:id" element={<AdminOrderDetail />} />
+            <Route path="cupons" element={<AdminCoupons />} />
           </Route>
 
           {/* Catch-all */}

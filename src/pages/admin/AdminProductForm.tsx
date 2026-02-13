@@ -78,6 +78,10 @@ export default function AdminProductForm() {
     active: true,
     careInstructions: [],
     measurements: {},
+    weightKg: 0.3,
+    heightCm: 5,
+    widthCm: 20,
+    lengthCm: 25,
   });
 
   const [newCareInstruction, setNewCareInstruction] = useState("");
@@ -105,6 +109,10 @@ export default function AdminProductForm() {
         active: existingProduct.active,
         careInstructions: existingProduct.careInstructions,
         measurements: existingProduct.measurements,
+        weightKg: existingProduct.weightKg ?? 0.3,
+        heightCm: existingProduct.heightCm ?? 5,
+        widthCm: existingProduct.widthCm ?? 20,
+        lengthCm: existingProduct.lengthCm ?? 25,
       });
       setAutoSlug(false);
     }
@@ -582,6 +590,68 @@ export default function AdminProductForm() {
                   placeholder="Deixe vazio se sem desconto"
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Shipping dimensions (Melhor Envio) */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Dimensões (Frete)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="weightKg">Peso (kg)</Label>
+                <Input
+                  id="weightKg"
+                  type="number"
+                  step="0.01"
+                  min={0.01}
+                  max={30}
+                  value={form.weightKg}
+                  onChange={(e) => updateField("weightKg", Number.parseFloat(e.target.value) || 0.3)}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <Label htmlFor="heightCm" className="text-xs">Altura (cm)</Label>
+                  <Input
+                    id="heightCm"
+                    type="number"
+                    step="0.1"
+                    min={1}
+                    max={100}
+                    value={form.heightCm}
+                    onChange={(e) => updateField("heightCm", Number.parseFloat(e.target.value) || 5)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="widthCm" className="text-xs">Largura (cm)</Label>
+                  <Input
+                    id="widthCm"
+                    type="number"
+                    step="0.1"
+                    min={1}
+                    max={100}
+                    value={form.widthCm}
+                    onChange={(e) => updateField("widthCm", Number.parseFloat(e.target.value) || 20)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="lengthCm" className="text-xs">Compr. (cm)</Label>
+                  <Input
+                    id="lengthCm"
+                    type="number"
+                    step="0.1"
+                    min={1}
+                    max={100}
+                    value={form.lengthCm}
+                    onChange={(e) => updateField("lengthCm", Number.parseFloat(e.target.value) || 25)}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Usado para calcular frete via Melhor Envio
+              </p>
             </CardContent>
           </Card>
 

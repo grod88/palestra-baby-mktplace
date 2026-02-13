@@ -21,6 +21,11 @@ export interface DbProduct {
   active: boolean;
   care_instructions: string[];
   measurements: Record<string, string>;
+  /** Shipping dimensions (Melhor Envio) */
+  weight_kg: number;
+  height_cm: number;
+  width_cm: number;
+  length_cm: number;
   created_at: string;
   updated_at: string;
 }

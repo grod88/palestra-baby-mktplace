@@ -19,6 +19,11 @@ export interface AdminProduct extends Product {
   active: boolean;
   createdAt: string;
   updatedAt: string;
+  /** Shipping dimensions */
+  weightKg: number;
+  heightCm: number;
+  widthCm: number;
+  lengthCm: number;
   productSizes: Array<{
     id: string;
     sizeLabel: string;
@@ -113,6 +118,11 @@ export interface ProductFormData {
   active: boolean;
   careInstructions: string[];
   measurements: Record<string, string>;
+  /** Shipping dimensions (Melhor Envio) */
+  weightKg: number;
+  heightCm: number;
+  widthCm: number;
+  lengthCm: number;
 }
 
 export interface StockUpdate {
@@ -167,6 +177,10 @@ function mapAdminProduct(db: DbProductWithRelations): AdminProduct {
     active: db.active,
     createdAt: db.created_at,
     updatedAt: db.updated_at,
+    weightKg: Number(db.weight_kg) || 0.3,
+    heightCm: Number(db.height_cm) || 5,
+    widthCm: Number(db.width_cm) || 20,
+    lengthCm: Number(db.length_cm) || 25,
     productSizes: db.product_sizes
       .sort((a, b) => (sizeOrder[a.size_label] ?? 99) - (sizeOrder[b.size_label] ?? 99))
       .map((s) => ({
@@ -340,6 +354,10 @@ export async function createProduct(form: ProductFormData): Promise<AdminProduct
       active: form.active,
       care_instructions: form.careInstructions,
       measurements: form.measurements,
+      weight_kg: form.weightKg,
+      height_cm: form.heightCm,
+      width_cm: form.widthCm,
+      length_cm: form.lengthCm,
     })
     .select(PRODUCT_SELECT)
     .single();
@@ -363,6 +381,10 @@ export async function updateProduct(id: string, form: Partial<ProductFormData>):
   if (form.active !== undefined) updateData.active = form.active;
   if (form.careInstructions !== undefined) updateData.care_instructions = form.careInstructions;
   if (form.measurements !== undefined) updateData.measurements = form.measurements;
+  if (form.weightKg !== undefined) updateData.weight_kg = form.weightKg;
+  if (form.heightCm !== undefined) updateData.height_cm = form.heightCm;
+  if (form.widthCm !== undefined) updateData.width_cm = form.widthCm;
+  if (form.lengthCm !== undefined) updateData.length_cm = form.lengthCm;
 
   const { data, error } = await supabase
     .from("products")
@@ -566,4 +588,139 @@ export async function updateTrackingCode(orderId: string, trackingCode: string):
     .eq("id", orderId);
 
   if (error) throw new Error(`Erro ao atualizar rastreio: ${error.message}`);
+}
+
+// ─── Coupons CRUD ────────────────────────────────────────────────────────────
+
+export interface AdminCoupon {
+  id: string;
+  code: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  minOrderValue: number | null;
+  maxUses: number | null;
+  usedCount: number;
+  category: string | null;
+  startsAt: string;
+  expiresAt: string | null;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface CouponFormData {
+  code: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  minOrderValue: number | null;
+  maxUses: number | null;
+  category: string | null;
+  startsAt: string;
+  expiresAt: string | null;
+  active: boolean;
+}
+
+function mapCoupon(db: any): AdminCoupon {
+  return {
+    id: db.id,
+    code: db.code,
+    discountType: db.discount_type,
+    discountValue: Number(db.discount_value),
+    minOrderValue: db.min_order_value ? Number(db.min_order_value) : null,
+    maxUses: db.max_uses,
+    usedCount: db.used_count,
+    category: db.category,
+    startsAt: db.starts_at,
+    expiresAt: db.expires_at,
+    active: db.active,
+    createdAt: db.created_at,
+  };
+}
+
+/** Listar todos os cupons */
+export async function fetchCoupons(): Promise<AdminCoupon[]> {
+  const { data, error } = await supabase
+    .from("coupons")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(`Erro ao buscar cupons: ${error.message}`);
+  return (data ?? []).map(mapCoupon);
+}
+
+/** Buscar cupom por ID */
+export async function fetchCouponById(id: string): Promise<AdminCoupon> {
+  const { data, error } = await supabase
+    .from("coupons")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) throw new Error(`Erro ao buscar cupom: ${error.message}`);
+  return mapCoupon(data);
+}
+
+/** Criar cupom */
+export async function createCoupon(form: CouponFormData): Promise<AdminCoupon> {
+  const { data, error } = await supabase
+    .from("coupons")
+    .insert({
+      code: form.code.toUpperCase().trim(),
+      discount_type: form.discountType,
+      discount_value: form.discountValue,
+      min_order_value: form.minOrderValue,
+      max_uses: form.maxUses,
+      category: form.category,
+      starts_at: form.startsAt,
+      expires_at: form.expiresAt,
+      active: form.active,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(`Erro ao criar cupom: ${error.message}`);
+  return mapCoupon(data);
+}
+
+/** Atualizar cupom */
+export async function updateCoupon(id: string, form: Partial<CouponFormData>): Promise<AdminCoupon> {
+  const updateData: Record<string, any> = {};
+  if (form.code !== undefined) updateData.code = form.code.toUpperCase().trim();
+  if (form.discountType !== undefined) updateData.discount_type = form.discountType;
+  if (form.discountValue !== undefined) updateData.discount_value = form.discountValue;
+  if (form.minOrderValue !== undefined) updateData.min_order_value = form.minOrderValue;
+  if (form.maxUses !== undefined) updateData.max_uses = form.maxUses;
+  if (form.category !== undefined) updateData.category = form.category;
+  if (form.startsAt !== undefined) updateData.starts_at = form.startsAt;
+  if (form.expiresAt !== undefined) updateData.expires_at = form.expiresAt;
+  if (form.active !== undefined) updateData.active = form.active;
+
+  const { data, error } = await supabase
+    .from("coupons")
+    .update(updateData)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw new Error(`Erro ao atualizar cupom: ${error.message}`);
+  return mapCoupon(data);
+}
+
+/** Deletar cupom (hard delete) */
+export async function deleteCoupon(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("coupons")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw new Error(`Erro ao excluir cupom: ${error.message}`);
+}
+
+/** Ativar/desativar cupom */
+export async function toggleCouponActive(id: string, active: boolean): Promise<void> {
+  const { error } = await supabase
+    .from("coupons")
+    .update({ active })
+    .eq("id", id);
+
+  if (error) throw new Error(`Erro ao ${active ? "ativar" : "desativar"} cupom: ${error.message}`);
 }

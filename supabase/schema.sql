@@ -110,6 +110,11 @@ CREATE TABLE IF NOT EXISTS products (
   -- Structured data stored as JSONB to avoid over-normalizing
   care_instructions TEXT[] NOT NULL DEFAULT '{}',          -- array of strings
   measurements      JSONB  NOT NULL DEFAULT '{}'::jsonb,   -- {"RN":"Altura: 50-55cm", ...}
+  -- Shipping dimensions (Melhor Envio)
+  weight_kg         DECIMAL(5,2) DEFAULT 0.3,              -- peso em kg
+  height_cm         DECIMAL(5,1) DEFAULT 5,                -- altura em cm
+  width_cm          DECIMAL(5,1) DEFAULT 20,               -- largura em cm
+  length_cm         DECIMAL(5,1) DEFAULT 25,               -- comprimento em cm
   -- Timestamps
   created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -242,9 +247,19 @@ CREATE TABLE IF NOT EXISTS orders (
   shipping_city     TEXT NOT NULL,
   shipping_state    CHAR(2) NOT NULL,
   tracking_code     TEXT,
+  -- Shipping service details (Melhor Envio)
+  shipping_service_id    INTEGER,
+  shipping_service_name  TEXT,
+  shipping_company       TEXT,
+  shipping_delivery_days INTEGER,
   -- Payment
   payment_method    payment_method NOT NULL,
   payment_id        TEXT,                    -- Mercado Pago external reference
+  -- Mercado Pago details
+  mp_payment_id     TEXT,
+  mp_payment_status TEXT,
+  mp_payment_method TEXT,
+  mp_installments   INTEGER DEFAULT 1,
   -- Totals
   subtotal          NUMERIC(10,2) NOT NULL,
   discount_amount   NUMERIC(10,2) NOT NULL DEFAULT 0,
@@ -327,6 +342,25 @@ ALTER TABLE orders
 ALTER TABLE orders
   ADD CONSTRAINT fk_orders_coupon
   FOREIGN KEY (coupon_id) REFERENCES coupons(id) ON DELETE SET NULL;
+
+-- =============================================================================
+-- 6b. ADMIN OTP CODES (MFA by email)
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS admin_otp_codes (
+  id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id    UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  code       TEXT NOT NULL,                -- bcrypt hash of 6-digit code
+  expires_at TIMESTAMPTZ NOT NULL,         -- created_at + 5 minutes
+  used       BOOLEAN DEFAULT FALSE,
+  attempts   INTEGER DEFAULT 0,            -- max 3 attempts
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE admin_otp_codes ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS idx_otp_expires ON admin_otp_codes(expires_at) WHERE used = FALSE;
+CREATE INDEX IF NOT EXISTS idx_otp_user    ON admin_otp_codes(user_id, created_at DESC);
 
 -- =============================================================================
 -- 7. CONTENT (public-facing)
