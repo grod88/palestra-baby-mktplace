@@ -126,7 +126,7 @@ serve(async (req) => {
         service_name: service.name,
         company_name: service.company.name,
         company_picture: service.company.picture,
-        price: parseFloat(service.price),
+        price: Number.parseFloat(service.price),
         delivery_days: service.delivery_time,
         delivery_range: service.delivery_range,
       }))
