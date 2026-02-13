@@ -386,22 +386,16 @@ export default function Checkout() {
                         const isDisabled = !!option.minValue && !isFreeAvailable;
 
                         return (
-                          <div
+                          <button
                             key={option.id}
-                            role="button"
-                            tabIndex={isDisabled ? -1 : 0}
-                            className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
+                            type="button"
+                            disabled={isDisabled}
+                            className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors w-full text-left ${
                               state.shippingMethod === option.id
                                 ? "border-primary bg-primary/5"
                                 : "border-border hover:border-primary/50"
                             } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                            onClick={() => !isDisabled && setShippingMethod(option.id as "pac" | "sedex" | "free")}
-                            onKeyDown={(e) => {
-                              if ((e.key === "Enter" || e.key === " ") && !isDisabled) {
-                                e.preventDefault();
-                                setShippingMethod(option.id as "pac" | "sedex" | "free");
-                              }
-                            }}
+                            onClick={() => setShippingMethod(option.id as "pac" | "sedex" | "free")}
                           >
                             <div className="flex items-center gap-3">
                               <RadioGroupItem
@@ -428,7 +422,7 @@ export default function Checkout() {
                                 ? "Grátis"
                                 : formatPrice(option.price)}
                             </span>
-                          </div>
+                          </button>
                         );
                       })}
                     </RadioGroup>
@@ -472,21 +466,14 @@ export default function Checkout() {
                       }
                       className="space-y-3"
                     >
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
+                      <button
+                        type="button"
+                        className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors w-full text-left ${
                           state.paymentMethod === "pix"
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/50"
                         }`}
                         onClick={() => setPaymentMethod("pix")}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setPaymentMethod("pix");
-                          }
-                        }}
                       >
                         <div className="flex items-center gap-3">
                           <RadioGroupItem value="pix" id="payment-pix" />
@@ -503,23 +490,16 @@ export default function Checkout() {
                             </p>
                           </label>
                         </div>
-                      </div>
+                      </button>
 
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
+                      <button
+                        type="button"
+                        className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors w-full text-left ${
                           state.paymentMethod === "credit_card"
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/50"
                         }`}
                         onClick={() => setPaymentMethod("credit_card")}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setPaymentMethod("credit_card");
-                          }
-                        }}
                       >
                         <div className="flex items-center gap-3">
                           <RadioGroupItem value="credit_card" id="payment-credit-card" />
@@ -535,7 +515,7 @@ export default function Checkout() {
                             </p>
                           </label>
                         </div>
-                      </div>
+                      </button>
                     </RadioGroup>
                   </div>
 
