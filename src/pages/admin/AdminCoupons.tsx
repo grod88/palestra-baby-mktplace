@@ -193,6 +193,21 @@ export default function AdminCoupons() {
     return coupon.usedCount >= coupon.maxUses;
   };
 
+  const getCouponStatusBadge = (coupon: AdminCoupon) => {
+    if (!coupon.active) {
+      return <Badge variant="secondary">Inativo</Badge>;
+    }
+    if (isExpired(coupon)) {
+      return <Badge variant="destructive">Expirado</Badge>;
+    }
+    if (isMaxedOut(coupon)) {
+      return <Badge variant="destructive">Esgotado</Badge>;
+    }
+    return (
+      <Badge className="bg-emerald-100 text-emerald-800">Ativo</Badge>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -296,19 +311,7 @@ export default function AdminCoupons() {
                         ] ?? coupon.category
                       : "Todas"}
                   </TableCell>
-                  <TableCell>
-                    {!coupon.active ? (
-                      <Badge variant="secondary">Inativo</Badge>
-                    ) : isExpired(coupon) ? (
-                      <Badge variant="destructive">Expirado</Badge>
-                    ) : isMaxedOut(coupon) ? (
-                      <Badge variant="destructive">Esgotado</Badge>
-                    ) : (
-                      <Badge className="bg-emerald-100 text-emerald-800">
-                        Ativo
-                      </Badge>
-                    )}
-                  </TableCell>
+                  <TableCell>{getCouponStatusBadge(coupon)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center gap-1 justify-end">
                       <Button
